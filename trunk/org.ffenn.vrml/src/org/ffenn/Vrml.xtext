@@ -1,0 +1,103 @@
+grammar org.ffenn.Vrml with org.eclipse.xtext.common.Terminals
+
+generate vrml "http://www.ffenn.org/Vrml"
+
+Model :
+	(elements += Statement)*;
+	
+terminal FLOAT 			: '-'?('0'..'9')*('.'('0'..'9')+)?;
+terminal SL_COMMENT 	: '#' !('\n'|'\r')* ('\r'? '\n')?;
+terminal STRING	: 
+			'"' ( '\\' ('b'|'t'|'n'|'f'|'r'|'"'|"'"|'\\') | !('\\'|'"') )* '"' |
+			"'" ( '\\' ('b'|'t'|'n'|'f'|'r'|'"'|"'"|'\\') | !('\\'|"'") )* "'";
+
+Statement :
+	NodeStatement | ProtoStatement | RouteStatement;
+	
+NodeStatement returns NodeStatement :
+	Node | Script | DefStatement ;
+	
+DefStatement returns DefStatement:
+	'DEF' name=ID node=(Node|Script);
+
+ProtoStatement :
+	Proto | ExternProto;
+
+RouteStatement : 
+	'ROUTE' source=[DefStatement] '.' eventOut=ID 'TO' target=[DefStatement] '.' eventIn=ID ;
+	
+Node returns Node : 
+	name=ID '{' nodeBody=NodeBody '}';
+	
+Script returns Script: 
+	name='Script' '{' scriptBody=ScriptBody '}' ;
+
+Proto : 
+	protoType='PROTO' name=ID '[' interfaces+=InterfaceDeclaration* ']' '{' ProtoBody=ProtoBody '}' ;
+	
+ExternProto :
+	protoType='EXTERNPROTO' name=ID '[' interfaces+=ExternInterfaceDeclaration* ']' URLList=MFString ;
+	
+InterfaceDeclaration : 
+	EventIn | EventOut | FieldDeclaration | ExposedFieldDeclaration;
+	
+ExternInterfaceDeclaration :
+	EventIn | EventOut | Field | ExposedField;
+
+ProtoBody : 
+	statement+=Statement*;
+	
+ScriptBody :
+	scriptBody+=ScriptBodyElement*;
+
+ScriptBodyElement :
+	 fieldName=ID fieldValue=FieldList | nodeBodyElement=[NodeBodyElement] | InterfaceDeclaration | 
+	 eventInId=ID 'IS' eventInName=[EventIn] | eventOutId=ID 'IS' eventOutName=[EventOut] | 
+	 fieldId=ID 'IS' fieldRef=([Field]|[ExposedField]);
+
+NodeBody :
+	NodeBody+=NodeBodyElement*;
+
+NodeBodyElement :
+	fieldName=ID fieldValue=FieldList | fieldId=ID 'IS' fieldRef=([Field]|[ExposedField]) | 
+	eventInId=ID 'IS' eventInName=[EventIn] | eventOutId=ID 'IS' eventOutName=[EventOut] | RouteStatement | 
+	ProtoStatement; 
+
+FieldType:
+	'MFColor' | 'MFFloat' | 'MFInt32' | 'MFNode' | 'MFRotation' | 'MFString' | 'MFTime' | 'MFVec2f' | 'MFVec3f' | 
+	'SFBool' | 'SFColor' | 'SFFloat' | 'SFImage' | 'SFInt32' | 'SFNode' | 'SFRotation' | 'SFString' | 'SFTime' | 
+	'SFVec2f' | 'SFVec3f' | 'MFBool';
+
+FieldList:
+	value=SFString | value=MFColor | value=MFFloat | value=MFInt32 | MFNode | value=MFRotation | value=MFString | MFTime | value=MFVec2f | value=MFVec3f | 
+	value=SFBool | value=SFColor | value=SFFloat | value=SFImage | value=SFInt32 | SFNode | value=SFRotation | value=SFTime | value=SFVec2f | value=SFVec3f | value=MFBool;
+
+SFColor: FLOAT FLOAT FLOAT;	
+SFBool: 'TRUE' | 'FALSE';
+SFFloat: FLOAT;	
+SFImage: INT+;
+SFInt32: INT;
+SFNode: node=NodeStatement | 'NULL' | 'USE' use=[DefStatement];
+SFRotation:	SFVec3f FLOAT;	
+SFVec2f: FLOAT FLOAT;
+SFVec3f: FLOAT FLOAT FLOAT;	
+SFString: STRING/*=[Crossreference?]*/ | '"' STRING '"';
+SFTime: FLOAT;
+MFColor: '[' SFColor (','? SFColor)* ']';
+MFFloat: '[' SFFloat (','? SFFloat)* ']';
+MFInt32: '[' SFInt32 (','? SFInt32)* ']';
+MFNode: '[' nodes+=SFNode* ']';
+MFRotation: '[' SFRotation (','? SFRotation)* ']';
+MFTime: '[' times+=SFTime (','? times+=SFTime)* ']';
+MFVec2f: '[' SFVec2f (','? SFVec2f)* ']';
+MFVec3f: '[' SFVec3f (','? SFVec3f)* ']';
+MFString: '[' SFString  (','? SFString)* ']';
+MFBool: '[' SFBool (','? SFBool)* ']';
+
+EventIn returns EventIn: id='eventIn' fType=FieldType name=ID;
+EventOut returns EventOut: id='eventOut' fType=FieldType name=ID;
+
+Field returns Field: id='field' fType=FieldType name=ID;
+FieldDeclaration : field=Field values=FieldList;
+ExposedField returns ExposedField: id='exposedField' fType=FieldType name=ID;
+ExposedFieldDeclaration : field=ExposedField values=FieldList;
