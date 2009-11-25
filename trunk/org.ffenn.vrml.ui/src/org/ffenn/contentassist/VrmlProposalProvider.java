@@ -13,11 +13,6 @@ import org.eclipse.xtext.Keyword;
 import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.ui.core.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.core.editor.contentassist.ICompletionProposalAcceptor;
-import org.ffenn.validation.FType;
-import org.ffenn.validation.FieldDef;
-import org.ffenn.validation.FieldValidator;
-import org.ffenn.validation.ProtoDef;
-import org.ffenn.validation.VrmlProtoDef;
 import org.ffenn.vrml.DefStatement;
 import org.ffenn.vrml.ExposedField;
 import org.ffenn.vrml.ExposedFieldDeclaration;
@@ -28,6 +23,11 @@ import org.ffenn.vrml.Node;
 import org.ffenn.vrml.NodeBodyElement;
 import org.ffenn.vrml.RouteStatement;
 import org.ffenn.vrml.Script;
+import org.ffenn.validation.FType;
+import org.ffenn.validation.FieldDef;
+import org.ffenn.validation.FieldValidator;
+import org.ffenn.validation.ProtoDef;
+import org.ffenn.validation.VrmlProtoDef;
 
 /**
  * see
