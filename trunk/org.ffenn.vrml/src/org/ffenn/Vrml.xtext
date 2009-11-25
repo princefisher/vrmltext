@@ -51,17 +51,13 @@ ScriptBody :
 	scriptBody+=ScriptBodyElement*;
 
 ScriptBodyElement :
-	 fieldName=ID fieldValue=FieldList | nodeBodyElement=[NodeBodyElement] | InterfaceDeclaration | 
-	 eventInId=ID 'IS' eventInName=[EventIn] | eventOutId=ID 'IS' eventOutName=[EventOut] | 
-	 fieldId=ID 'IS' fieldRef=([Field]|[ExposedField]);
+	fieldName=ID (fieldValue=FieldList | 'IS' fieldRef=([EventIn] | [EventOut] | [Field] | [ExposedField])) | nodeBodyElement=[NodeBodyElement] | InterfaceDeclaration;
 
 NodeBody :
 	NodeBody+=NodeBodyElement*;
 
 NodeBodyElement :
-	fieldName=ID fieldValue=FieldList | fieldId=ID 'IS' fieldRef=([Field]|[ExposedField]) | 
-	eventInId=ID 'IS' eventInName=[EventIn] | eventOutId=ID 'IS' eventOutName=[EventOut] | RouteStatement | 
-	ProtoStatement; 
+	fieldName=ID (fieldValue=FieldList | 'IS' fieldRef=([EventIn] | [EventOut] | [Field]| [ExposedField])) | RouteStatement | ProtoStatement; 
 
 FieldType:
 	'MFColor' | 'MFFloat' | 'MFInt32' | 'MFNode' | 'MFRotation' | 'MFString' | 'MFTime' | 'MFVec2f' | 'MFVec3f' | 
@@ -81,7 +77,7 @@ SFNode: node=NodeStatement | 'NULL' | 'USE' use=[DefStatement];
 SFRotation:	SFVec3f FLOAT;	
 SFVec2f: FLOAT FLOAT;
 SFVec3f: FLOAT FLOAT FLOAT;	
-SFString: STRING/*=[Crossreference?]*/ | '"' STRING '"';
+SFString: STRING | '"' STRING '"';
 SFTime: FLOAT;
 MFColor: '[' SFColor (','? SFColor)* ']';
 MFFloat: '[' SFFloat (','? SFFloat)* ']';

@@ -110,12 +110,6 @@ public class VrmlProposalProvider extends AbstractVrmlProposalProvider {
 	@Override
 	public void completeNodeBodyElement_FieldRef(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
 	@Override
-	public void completeScriptBodyElement_EventInName(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
-	@Override
-	public void completeScriptBodyElement_EventOutName(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
-	@Override
-	public void completeScriptBodyElement_FieldId(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
-	@Override
 	public void completeScriptBodyElement_FieldName(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
 	@Override
 	public void completeScriptBodyElement_FieldRef(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
@@ -421,17 +415,6 @@ public class VrmlProposalProvider extends AbstractVrmlProposalProvider {
 	@Override
 	public void completeNodeBody_NodeBody(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
 	@Override
-	public void completeNodeBodyElement_EventInId(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
-	@Override
-	public void completeNodeBodyElement_EventInName(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
-	@Override
-	public void completeNodeBodyElement_EventOutId(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
-	@Override
-	public void completeNodeBodyElement_EventOutName(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
-	@Override
-	public void completeNodeBodyElement_FieldId(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {}
-
-	@Override
 	public void completeNodeBodyElement_FieldName(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		EObject obj = model;
 		do {
@@ -463,8 +446,6 @@ public class VrmlProposalProvider extends AbstractVrmlProposalProvider {
 					NodeBodyElement el = (NodeBodyElement) o2;
 					if (el.getFieldName() != null) {
 						alreadyUsed.add(el.getFieldName());
-					} else if (el.getFieldId() != null) {
-						alreadyUsed.add(el.getFieldId());
 					}
 				}
 			}
