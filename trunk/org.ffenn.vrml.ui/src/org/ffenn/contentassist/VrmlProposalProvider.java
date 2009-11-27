@@ -30,8 +30,7 @@ import org.ffenn.validation.ProtoDef;
 import org.ffenn.validation.VrmlProtoDef;
 
 /**
- * see
- * http://www.eclipse.org/Xtext/documentation/latest/xtext.html#contentAssist on
+ * @see http://www.eclipse.org/Xtext/documentation/latest/xtext.html#contentAssist on
  * how to customize content assistant
  */
 public class VrmlProposalProvider extends AbstractVrmlProposalProvider {
