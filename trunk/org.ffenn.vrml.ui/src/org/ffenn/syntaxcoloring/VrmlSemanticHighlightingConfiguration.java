@@ -16,15 +16,14 @@ public class VrmlSemanticHighlightingConfiguration implements ISemanticHighlight
 	public static final String PINK = "rose";
 	public static final String YELLOW = "jaune";
 	
-	@Override
 	public void configure(IHighlightingConfigurationAcceptor acceptor) {
 		acceptor.acceptDefaultHighlighting(TERMINAL_STRING, "String", chaine());
-		acceptor.acceptDefaultHighlighting(DARKRED, "Texte rouge sombre", rougeSombre());
-		acceptor.acceptDefaultHighlighting(RED, "Texte rouge", rouge());
-		acceptor.acceptDefaultHighlighting(BLUE, "Texte bleu", bleu());
-		acceptor.acceptDefaultHighlighting(GREEN, "Texte vert", vert());
-		acceptor.acceptDefaultHighlighting(PINK, "Texte rose", rose());
-		acceptor.acceptDefaultHighlighting(YELLOW, "Texte jaune", jaune());
+		acceptor.acceptDefaultHighlighting(DARKRED, "EventIn", rougeSombre());
+		acceptor.acceptDefaultHighlighting(RED, "EventIn", rouge());
+		acceptor.acceptDefaultHighlighting(BLUE, "Values", bleu());
+		acceptor.acceptDefaultHighlighting(GREEN, "Fields", vert());
+		acceptor.acceptDefaultHighlighting(PINK, "EventOut", rose());
+		acceptor.acceptDefaultHighlighting(YELLOW, "Referenced Field", jaune());
 	}
 
 	public TextStyle chaine() {

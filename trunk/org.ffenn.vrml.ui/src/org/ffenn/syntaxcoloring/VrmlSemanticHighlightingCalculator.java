@@ -13,7 +13,6 @@ import org.eclipse.xtext.ui.common.editor.syntaxcoloring.ISemanticHighlightingCa
 
 public class VrmlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 
-	@Override
 	public void provideHighlightingFor(XtextResource resource, IHighlightedPositionAcceptor acceptor) {
 		if (resource == null) {
 			return;
