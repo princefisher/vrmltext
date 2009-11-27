@@ -3,6 +3,7 @@ package org.ffenn.validation;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// Verifies that the values of the fields are correct according to their types.
 public class FieldValidator {
 	public static boolean validate(FType type, String value) {
 		switch(type) {
