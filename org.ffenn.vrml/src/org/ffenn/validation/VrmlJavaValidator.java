@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
@@ -25,7 +24,6 @@ import org.ffenn.vrml.impl.ExposedFieldDeclarationImpl;
 import org.ffenn.vrml.impl.ExposedFieldImpl;
 import org.ffenn.vrml.impl.FieldDeclarationImpl;
 import org.ffenn.vrml.impl.FieldImpl;
-
 import com.google.inject.cglib.core.CollectionUtils;
 import com.google.inject.cglib.core.Transformer;
 
@@ -34,6 +32,8 @@ import com.google.inject.cglib.core.Transformer;
  * Class that checks and validate VRML code that is accepted by the grammar but still incorrect
  */
 public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
+	// Reference : http://blogs.itemis.de/stundzig/archives/487
+	// Lists of the protos and def.
 	protected Map<String, ProtoDef> protoList = new HashMap<String, ProtoDef>();
 	protected Map<String, ProtoDef> defList = new HashMap<String, ProtoDef>();
 
@@ -44,7 +44,7 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 	 * case)
 	 */
 	@SuppressWarnings("unchecked")
-	@Check(CheckType.NORMAL)
+	@Check(CheckType.NORMAL) // Checks when the user saves
 	public void duplicateProtoNames(ProtoStatement protoStatement) {
 		EList<EObject> allSiblings = protoStatement.eContainer().eContents();
 		List<ProtoStatement> typedSiblings = EcoreUtil2.typeSelect(allSiblings, ProtoStatement.class);
@@ -56,59 +56,64 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 		int nameFrequency = Collections.frequency(names, protoStatement.getName());
 		if (nameFrequency != 1) {
 			error("Duplicate name " + protoStatement.getName(), org.ffenn.vrml.VrmlPackage.PROTO_STATEMENT__NAME);
-		} else {
+		} else { // If the proto isn't a duplicate, create a protodef and store the informations of the current proto.
 			ProtoDef proto = new ProtoDef(protoStatement.getName(), this);
 			for (EObject o : protoStatement.eContents()) {
 				storeField(proto, o);
 			}
 			protoList.put(protoStatement.getName(), proto);
-			if (VrmlProtoDef.getAllFilesProtoList().containsKey(protoStatement.getName()) && !VrmlProtoDef.getAllFilesProtoList().get(protoStatement.getName()).isInTheSameFile(this)) {
-				warning(protoStatement.getName() + " already exists in another file", 5);// org.ffenn.vrml.VrmlPackage.PROTO_STATEMENT__NAME);
+			// Checks if the proto exists in the project, and if not adds it to the global list.
+			if (VrmlProtoDef.getAllFilesProtoList().containsKey(protoStatement.getName())
+					&& !VrmlProtoDef.getAllFilesProtoList().get(protoStatement.getName()).isInTheSameFile(this)) {
+				warning(protoStatement.getName() + " already exists in another file", 5);
 			} else {
 				VrmlProtoDef.getAllFilesProtoList().put(protoStatement.getName(), proto);
 			}
 			if (protoList.size() > names.size()) {
 				syncProtoList(names);
 			}
-		}
-	}
+	    }
+	  }
+	  
+	  // Checks the validity of the fields entered for a node.
+	  @Check(CheckType.FAST)
+	  public void checkNodeFieldsValidity(NodeBodyElement nbe) {
+		  if (nbe.eContainer().eContainer() instanceof Node) {
+			  String fieldName = nbe.getFieldName(); // Current field name
+			  String nodeName = ((Node) nbe.eContainer().eContainer()).getName(); // Current node name
+			  if (fieldName!=null && nodeName!= null) {
+				  if (protoList.containsKey(nodeName)) {
+					  ProtoDef protoDef = (ProtoDef)protoList.get(nodeName);
+					  if(!FieldValidator.validate(protoDef.getFieldType(fieldName), nbe.getFieldValue().getValue())) {
+							error("Wrong value type for " + protoDef.getFieldType(fieldName), org.ffenn.vrml.VrmlPackage.NODE_BODY_ELEMENT);
+						}
+				  } else if (VrmlProtoDef.getGrammarProtoList().containsKey(nodeName)) {
+					  // TODO Check if grammar proto 
+				  }
+				  FType fieldType = VrmlProtoDef.getGrammarProtoList().get(nodeName).getFieldType(fieldName);
+				  if(!FieldValidator.validate(fieldType, nbe.getFieldValue().getValue())) {
+					  error("Wrong value type for " + fieldType, org.ffenn.vrml.VrmlPackage.NODE_BODY_ELEMENT);
+				  }
+			  }
 
-	@Check(CheckType.FAST)
-	public void checkNodeFieldsValidity(NodeBodyElement nbe) {
-		if (nbe.eContainer().eContainer() instanceof Node) {
-			String fieldName = nbe.getFieldName(); // Nom du champ actuel
-			// Nom du node dans lequel on se trouve
-			String nodeName = ((Node) nbe.eContainer().eContainer()).getName();
-			if (fieldName != null && nodeName != null) {
-				if (protoList.containsKey(nodeName)) {
-					ProtoDef protoDef = (ProtoDef) protoList.get(nodeName);
-					if (!FieldValidator.validate(protoDef.getFieldType(fieldName), nbe.getFieldValue().getValue())) {
-						error("Wrong value type for " + protoDef.getFieldType(fieldName), org.ffenn.vrml.VrmlPackage.NODE_BODY_ELEMENT);
+		  }
+	  }
+	  
+	  @Check(CheckType.FAST)
+	  // Checks that the field respects its type
+	  public void checkFieldValidity(FieldDeclaration field) {
+		  	// TODO Checks for node IS node
+	    	for(EObject f : field.eContents()) {
+				if (f instanceof Field) {
+					Field fi = (Field) f;
+					if(!FieldValidator.validate(FType.valueOf(fi.getFType()), field.getValues().getValue())) {
+						error("Wrong value type for " + fi.getFType(), org.ffenn.vrml.VrmlPackage.FIELD_DECLARATION);
 					}
-				} else if (VrmlProtoDef.getGrammarProtoList().containsKey(nodeName)) {
 				}
-				FType fieldType = VrmlProtoDef.getGrammarProtoList().get(nodeName).getFieldType(fieldName);
-				if (!FieldValidator.validate(fieldType, nbe.getFieldValue().getValue())) {
-					error("Wrong value type for " + fieldType, org.ffenn.vrml.VrmlPackage.NODE_BODY_ELEMENT);
-				}
-			}
-
+	    	}
 		}
-	}
 
-	@Check(CheckType.FAST)
-	public void checkFieldValidity(FieldDeclaration field) {
-		// TODO Vérifier correspondances entre noeud IS noeud
-		for (EObject f : field.eContents()) {
-			if (f instanceof Field) {
-				Field fi = (Field) f;
-				if (!FieldValidator.validate(FType.valueOf(fi.getFType()), field.getValues().getValue())) {
-					error("Wrong value type for " + fi.getFType(), org.ffenn.vrml.VrmlPackage.FIELD_DECLARATION);
-				}
-			}
-		}
-	}
-
+	// Cleans the protoList, removing deleted protos.
 	private void syncProtoList(List<String> names) {
 		List<String> toDelete = new LinkedList<String>();
 
@@ -130,6 +135,7 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 		}
 	}
 
+	// Checks the DEF statements
 	@Check(CheckType.NORMAL)
 	public void checkDefStatement(DefStatement def) {
 		String name = def.getName();
@@ -153,14 +159,15 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 					for (EObject field : sbody.eContents()) {
 						storeField(proto, field);
 					}
-				}
-			}
+		    	}
+		    }
 			if (name != null && proto != null) {
 				defList.put(name, proto);
 			}
 		}
-	}
-
+	  }
+	  
+	// Adds fields with their types and values to the protos.
 	private void storeField(ProtoDef proto, EObject object) {
 		if (object instanceof FieldDeclarationImpl) {
 			for (EObject f : object.eContents()) {
@@ -184,7 +191,8 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 			proto.addField(event.getName(), FieldType.EVENT_OUT, FType.valueOf(event.getFType()));
 		}
 	}
-
+	
+	// Checks the validity of the ROUTE statements 
 	@Check(CheckType.NORMAL)
 	public void checkRouteStatement(RouteStatement route) {
 		if (!defList.containsKey(route.getSource().getName())) {
