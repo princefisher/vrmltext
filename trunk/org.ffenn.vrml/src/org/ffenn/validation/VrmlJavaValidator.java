@@ -29,9 +29,11 @@ import org.ffenn.vrml.impl.FieldImpl;
 import com.google.inject.cglib.core.CollectionUtils;
 import com.google.inject.cglib.core.Transformer;
 
+/**
+ * @see http://blogs.itemis.de/stundzig/archives/487 for example
+ * Class that checks and validate VRML code that is accepted by the grammar but still incorrect
+ */
 public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
-	// Reference : http://blogs.itemis.de/stundzig/archives/487
-
 	protected Map<String, ProtoDef> protoList = new HashMap<String, ProtoDef>();
 	protected Map<String, ProtoDef> defList = new HashMap<String, ProtoDef>();
 
