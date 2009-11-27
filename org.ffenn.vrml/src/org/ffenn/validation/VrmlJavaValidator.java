@@ -36,7 +36,10 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 	protected Map<String, ProtoDef> defList = new HashMap<String, ProtoDef>();
 
 	/*
-	 *  Detects repetitions of protos & externprotos names
+	 * Manage validation of Protos : - check duplicates name and fire an error
+	 * if found - stores user defined Protos in a hashmap and checks if this
+	 * Proto is already defined in another file (fire a warning if that's the
+	 * case)
 	 */
 	@SuppressWarnings("unchecked")
 	@Check(CheckType.NORMAL)
@@ -57,55 +60,53 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 				storeField(proto, o);
 			}
 			protoList.put(protoStatement.getName(), proto);
-			if (VrmlProtoDef.getAllFilesProtoList().containsKey(protoStatement.getName())
-					&& !VrmlProtoDef.getAllFilesProtoList().get(protoStatement.getName()).isInTheSameFile(this)) {
-				warning(protoStatement.getName() + " already exists in another file", 5);//org.ffenn.vrml.VrmlPackage.PROTO_STATEMENT__NAME);
+			if (VrmlProtoDef.getAllFilesProtoList().containsKey(protoStatement.getName()) && !VrmlProtoDef.getAllFilesProtoList().get(protoStatement.getName()).isInTheSameFile(this)) {
+				warning(protoStatement.getName() + " already exists in another file", 5);// org.ffenn.vrml.VrmlPackage.PROTO_STATEMENT__NAME);
 			} else {
 				VrmlProtoDef.getAllFilesProtoList().put(protoStatement.getName(), proto);
 			}
 			if (protoList.size() > names.size()) {
 				syncProtoList(names);
 			}
-	    }
-	  }
-	  
-	  @Check(CheckType.FAST)
-	  public void checkNodeFieldsValidity(NodeBodyElement nbe) {
-		  if (nbe.eContainer().eContainer() instanceof Node) {
-			  String fieldName = nbe.getFieldName(); // Nom du champ actuel
-			  String nodeName = ((Node) nbe.eContainer().eContainer()).getName(); // Nom du node dans lequel on se trouve
-			  if (fieldName!=null && nodeName!= null) {
-				  if (protoList.containsKey(nodeName)) {
-					  ProtoDef protoDef = (ProtoDef)protoList.get(nodeName);
-					  // TODO check next lines
-					  if(!FieldValidator.validate(protoDef.getFieldType(fieldName), nbe.getFieldValue().getValue())) {
-							error("Wrong value type for " + protoDef.getFieldType(fieldName), org.ffenn.vrml.VrmlPackage.NODE_BODY_ELEMENT);
-						}
-				  }
-				  else if (VrmlProtoDef.getGrammarProtoList().containsKey(nodeName)) {}
-				  FType fieldType = VrmlProtoDef.getGrammarProtoList().get(nodeName).getFieldType(fieldName);
-				  if(!FieldValidator.validate(fieldType, nbe.getFieldValue().getValue())) {
-					  error("Wrong value type for " + fieldType, org.ffenn.vrml.VrmlPackage.NODE_BODY_ELEMENT);
-				  }
-			  }
-
-		  }
-//		  System.out.println("mais non je suis ici et fieldName était " + fieldName + " et avec un get j'ai : " + VrmlProtoDef.getProtoList().get(fieldName));
-	  }
-	  
-	  @Check(CheckType.FAST)
-	  public void checkFieldValidity(FieldDeclaration field) {
-		  	// TODO Vérifier correspondances entre noeud IS noeud
-	    	for(EObject f : field.eContents()) {
-				if (f instanceof Field) {
-					Field fi = (Field) f;
-					if(!FieldValidator.validate(FType.valueOf(fi.getFType()), field.getValues().getValue())) {
-						error("Wrong value type for " + fi.getFType(), org.ffenn.vrml.VrmlPackage.FIELD_DECLARATION);
-					}
-				}
-	    	}
 		}
-	
+	}
+
+	@Check(CheckType.FAST)
+	public void checkNodeFieldsValidity(NodeBodyElement nbe) {
+		if (nbe.eContainer().eContainer() instanceof Node) {
+			String fieldName = nbe.getFieldName(); // Nom du champ actuel
+			// Nom du node dans lequel on se trouve
+			String nodeName = ((Node) nbe.eContainer().eContainer()).getName();
+			if (fieldName != null && nodeName != null) {
+				if (protoList.containsKey(nodeName)) {
+					ProtoDef protoDef = (ProtoDef) protoList.get(nodeName);
+					if (!FieldValidator.validate(protoDef.getFieldType(fieldName), nbe.getFieldValue().getValue())) {
+						error("Wrong value type for " + protoDef.getFieldType(fieldName), org.ffenn.vrml.VrmlPackage.NODE_BODY_ELEMENT);
+					}
+				} else if (VrmlProtoDef.getGrammarProtoList().containsKey(nodeName)) {
+				}
+				FType fieldType = VrmlProtoDef.getGrammarProtoList().get(nodeName).getFieldType(fieldName);
+				if (!FieldValidator.validate(fieldType, nbe.getFieldValue().getValue())) {
+					error("Wrong value type for " + fieldType, org.ffenn.vrml.VrmlPackage.NODE_BODY_ELEMENT);
+				}
+			}
+
+		}
+	}
+
+	@Check(CheckType.FAST)
+	public void checkFieldValidity(FieldDeclaration field) {
+		// TODO Vérifier correspondances entre noeud IS noeud
+		for (EObject f : field.eContents()) {
+			if (f instanceof Field) {
+				Field fi = (Field) f;
+				if (!FieldValidator.validate(FType.valueOf(fi.getFType()), field.getValues().getValue())) {
+					error("Wrong value type for " + fi.getFType(), org.ffenn.vrml.VrmlPackage.FIELD_DECLARATION);
+				}
+			}
+		}
+	}
+
 	private void syncProtoList(List<String> names) {
 		List<String> toDelete = new LinkedList<String>();
 
@@ -127,13 +128,13 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 		}
 	}
 
-	@Check(CheckType.NORMAL)	
+	@Check(CheckType.NORMAL)
 	public void checkDefStatement(DefStatement def) {
 		String name = def.getName();
 		ProtoDef proto = null;
 		for (EObject d : def.eContents()) {
 			if (d instanceof Node) {
-				String nodeName = ((Node)d).getName();
+				String nodeName = ((Node) d).getName();
 				if (protoList.containsKey(nodeName)) {
 					proto = protoList.get(nodeName);
 				} else if (VrmlProtoDef.getGrammarProtoList().containsKey(nodeName)) {
@@ -150,14 +151,14 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 					for (EObject field : sbody.eContents()) {
 						storeField(proto, field);
 					}
-		    	}
-		    }
+				}
+			}
 			if (name != null && proto != null) {
 				defList.put(name, proto);
 			}
 		}
-	  }
-	  
+	}
+
 	private void storeField(ProtoDef proto, EObject object) {
 		if (object instanceof FieldDeclarationImpl) {
 			for (EObject f : object.eContents()) {
@@ -181,7 +182,7 @@ public class VrmlJavaValidator extends AbstractVrmlJavaValidator {
 			proto.addField(event.getName(), FieldType.EVENT_OUT, FType.valueOf(event.getFType()));
 		}
 	}
-	
+
 	@Check(CheckType.NORMAL)
 	public void checkRouteStatement(RouteStatement route) {
 		if (!defList.containsKey(route.getSource().getName())) {
