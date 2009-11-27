@@ -5,7 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-// Stores the informations (name, types and values of the fields) of each proto.
+/**
+ *  Stores the informations (name, types and values of the fields) of each proto.
+ */
 public class ProtoDef {
 	private Map<String, FieldDef> fieldList = new HashMap<String, FieldDef>();
 	private String name = null;

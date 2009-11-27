@@ -1,6 +1,8 @@
 package org.ffenn.validation;
 
-// Stores the informations of each field.
+/**
+ *  Stores the informations of each field.
+ */
 public class FieldDef {
 	private FType sType = null;
 	private FieldType fieldType = null;

@@ -3,6 +3,10 @@ package org.ffenn.validation;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Contains the list of the base VRML protos
+ *
+ */
 public class VrmlProtoDef {
 	private static VrmlProtoDef instance = null;
 	private Map<String, ProtoDef> grammarProtoList = new HashMap<String, ProtoDef>();

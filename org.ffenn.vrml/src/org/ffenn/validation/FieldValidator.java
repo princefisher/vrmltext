@@ -50,7 +50,7 @@ public class FieldValidator {
 			}
 			break;
 		case MFNode:
-			return true; // Jusqu'à trouver comment l'implémenter...
+			return true; // FIXME If someone reads this, please, fix the poor little MFNode and its big sister SFNode...
 		case MFRotation:
 			if (validateMField(value)) {
 				String[] floats = value.substring(1, value.length()-1).trim().split("(\\s)*(,)?(\\s)+");
@@ -126,7 +126,7 @@ public class FieldValidator {
 		case SFInt32:
 			return validateSFInt32(value);
 		case SFNode:
-			return true; // Jusqu'à trouver comment l'implémenter...
+			return true; // FIXME If someone reads this, please save SFNode and its little sister MFNode...
 		case SFRotation:
 			return validateSFRotation(value);
 		case SFString:
